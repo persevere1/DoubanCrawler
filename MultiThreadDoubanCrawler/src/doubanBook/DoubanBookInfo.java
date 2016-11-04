@@ -132,7 +132,7 @@ public class DoubanBookInfo {
 	@Override
 	public String toString() {
 		return "\"" + title + "\",\"" + author + "\",\"" + publisher + "\",\"" + subTitle + "\",\"" + originalName
-				+ "\",\"" + pages + "\",\"" + ISBN + "\",\"" + rate + "\",\"" + votes;
+				+ "\",\"" + pages + "\",\"" + ISBN + "\",\"" + rate + "\",\"" + votes + "\"";
 	}
 
 }

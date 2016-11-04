@@ -19,11 +19,13 @@ public class MultiThreadCrawler {
 	private List<String> bookLinks; // book url list
 	private List<DoubanBookInfo> bookInfos; // book info list
 	private int total; // book 总数
+	private int count; // 找到的book数量
+	private int threadCount;
 	private int maxThreadNum = 30;
 
 	public List<String> begin(String url) {
 		beginAddBookUrl(url);
-		while (bookLinks.size() < total) {
+		while (bookLinks.size() < total && count != threadCount) {
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
@@ -33,7 +35,7 @@ public class MultiThreadCrawler {
 		System.out.println("finished book url crawling...");
 		System.out.println("start to book info crawling");
 		beginAddBookInfo();
-		while (bookInfos.size() < total) {
+		while (bookLinks.size() > 0) {
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
@@ -70,7 +72,8 @@ public class MultiThreadCrawler {
 		String temp = findPattern("共(.+?)<", pageContent).trim();
 		total = temp.equals("") ? 0 : Integer.parseInt(temp);
 		bookLinks = new ArrayList<String>();
-		final int threadCount = Math.min(maxThreadNum, getPageCount(total));
+		threadCount = Math.min(maxThreadNum, getPageCount(total));
+		count = 0;
 		for (int i = 0; i < threadCount; i++) {
 			String startUrl = nextUrl(pageUrl, i);
 			new Thread(new Runnable() {
@@ -92,6 +95,9 @@ public class MultiThreadCrawler {
 						// get page content
 						pageContent = SendGet(threadUrl);
 					}
+					synchronized (this) {
+						count++;
+					}
 				}
 			}, startUrl).start();
 		}
@@ -99,6 +105,7 @@ public class MultiThreadCrawler {
 
 	public void beginAddBookInfo() {
 		bookInfos = new ArrayList<DoubanBookInfo>();
+		count = 0;
 		for (int i = 0; i < maxThreadNum; i++) {
 			new Thread(new Runnable() {
 				@Override
